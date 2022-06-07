@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from tickets.models import *
+from .models import *
 
 class MovieSerializer(serializers.ModelSerializer):
 	class Meta:

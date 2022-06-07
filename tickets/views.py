@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from .serializers import *
 from rest_framework import status, filters
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
 
 # Create your views here.
 def no_rest_from_model(request):
@@ -59,3 +59,23 @@ def FBV_pk(request, pk):
 	elif request.method == 'DELETE':
 		guest.delete()
 		return Response(Status=status.HTTP_204_NO_CONTENT)
+
+
+# CBV
+class CBV_List(APIView):
+ 	def get(self, request):
+ 		guests = Guest.objects.all()
+ 		serializer = GuestSerializer(guests)
+ 		return Response(serializer.data)
+ 	def post(self, request):
+ 		serialaizer = GuestSerializer(data=request.data)
+ 		if serializer.is_valid():
+ 			serializer.save()
+ 			return Response(
+ 				serializer.data,
+ 				status = status.HTTP_201_CREATED
+ 			)
+ 		return Response(
+ 			serializer.data,
+ 			status = status.HTTP_400_BAD_REQUEST
+ 		)
