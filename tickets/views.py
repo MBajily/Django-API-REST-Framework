@@ -7,6 +7,7 @@ from rest_framework import status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import Http404
+from rest_framework import generics, mixins
 
 
 # Create your views here.
@@ -34,7 +35,6 @@ def FBV_List(request):
 			serializer.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -113,3 +113,38 @@ class CBV_pk(APIView):
 		guest = self.get_object(pk)
 		guest.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Mixins
+class mixins_list(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+	queryset = Guest.objects.all()
+	serializer_class = GuestSerializer
+
+	def get(self, request):
+		return self.list(request)
+	def post(self, request):
+		return self.create(request)
+
+
+class mixins_pk(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+	queryset = Guest.objects.all()
+	serializer_class = GuestSerializer
+
+	def get(self, request, pk):
+		return self.retrieve(request)
+	def put(self, request, pk):
+		return self.update(request)
+	def delete(self, request, pk):
+		return self.destroy(request)
+
+
+
+#  Generics
+class generics_list(generics.ListCreateAPIView):
+	queryset = Guest.objects.all()
+	serializer_class = GuestSerializer
+
+
+class generics_pk(generics.RetrieveUpdateDestroyAPIView):
+	queryset = Guest.objects.all()
+	serializer_class = GuestSerializer
