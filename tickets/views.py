@@ -7,7 +7,7 @@ from rest_framework import status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import Http404
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, viewsets, filters
 
 
 # Create your views here.
@@ -83,7 +83,6 @@ class CBV_List(APIView):
 		)
 
 
-
 class CBV_pk(APIView):
 	def get_object(self, pk):
 		try:
@@ -138,7 +137,6 @@ class mixins_pk(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Destr
 		return self.destroy(request)
 
 
-
 #  Generics
 class generics_list(generics.ListCreateAPIView):
 	queryset = Guest.objects.all()
@@ -148,3 +146,56 @@ class generics_list(generics.ListCreateAPIView):
 class generics_pk(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Guest.objects.all()
 	serializer_class = GuestSerializer
+
+
+# Viewsets
+# Guests
+class viewsets_guest(viewsets.ModelViewSet):
+	queryset = Guest.objects.all()
+	serializer_class = GuestSerializer
+
+
+# Movie
+class viewsets_movie(viewsets.ModelViewSet):
+	queryset = Movie.objects.all()
+	serializer_class = MovieSerializer
+	filter_backend = [filters.SearchFilter]
+	search_fields = ['movie']
+
+
+# Reservation
+class viewsets_reservation(viewsets.ModelViewSet):
+	queryset = Reservation.objects.all()
+	serializer_class = ReservationSerializer
+
+
+# Find a movie
+@api_view(['GET'])
+def find_movie(request):
+	movies = Movie.objects.filter(
+		hall = request.data['hall'],
+		movie = request.data['movie'],
+	)
+	serializer = MovieSerializer(movies, many=True)
+	return Response(serializer.data)
+
+
+# Create a new reservaion
+@api_view(['POST'])
+def new_reservation(request):
+	movie = Movie.objects.get(
+		hall =request.data['hall'],
+		movie = request.data['movie']
+		)
+
+	guest = Guest()
+	guest.name = request.data['name']
+	guest.mobile = request.data['mobile']
+	guest.save()
+
+	reservation = Reservation()
+	reservation.guest = guest
+	reservation.movie = movie 
+	reservation.save()
+
+	return Response(status=status.HTTP_201_CREATED)

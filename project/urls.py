@@ -14,9 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from tickets import views
+from rest_framework.routers import DefaultRouter
 
+
+router = DefaultRouter()
+router.register('guests', views.viewsets_guest)
+router.register('movies', views.viewsets_movie)
+router.register('reservations', views.viewsets_reservation)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +35,7 @@ urlpatterns = [
     path('rest/mixins/<int:pk>', views.mixins_pk.as_view()),
     path('rest/generics/', views.generics_list.as_view()),
     path('rest/generics/<int:pk>', views.generics_pk.as_view()),
+    path('rest/viewsets/', include(router.urls)),
+    path('fbv/find_movie/', views.find_movie),
+    path('fbv/new_reservation/', views.new_reservation),
 ]
